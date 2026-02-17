@@ -14,6 +14,7 @@ navigationCompose = "2.8.5"
 mapsCompose = "6.2.1"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
+mapsUtils = "3.8.2"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 room = "2.6.1"
@@ -46,6 +47,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+google-maps-utils = { group = "com.google.maps.android", name = "android-maps-utils", version.ref = "mapsUtils" }
 
 # NEW: Networking (Retrofit)
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
