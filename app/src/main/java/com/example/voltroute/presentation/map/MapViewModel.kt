@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.voltroute.data.location.LocationClient
+import com.example.voltroute.domain.model.BatteryState
 import com.example.voltroute.domain.model.Location
 import com.example.voltroute.domain.model.Route
 import com.example.voltroute.domain.model.Vehicle
+import com.example.voltroute.domain.usecase.CalculateBatteryUseCase
 import com.example.voltroute.domain.usecase.CalculateRouteUseCase
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
@@ -21,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val locationClient: LocationClient,
-    private val calculateRouteUseCase: CalculateRouteUseCase
+    private val calculateRouteUseCase: CalculateRouteUseCase,
+    private val calculateBatteryUseCase: CalculateBatteryUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -32,6 +35,7 @@ class MapViewModel @Inject constructor(
 
     init {
         checkLocationPermission()
+        calculateInitialBatteryState()
     }
 
     private fun checkLocationPermission() {
@@ -76,6 +80,18 @@ class MapViewModel @Inject constructor(
     }
 
     /**
+     * Calculate initial battery state without a route
+     * Called on ViewModel initialization to show current battery status
+     */
+    private fun calculateInitialBatteryState() {
+        val batteryState = calculateBatteryUseCase(
+            vehicle = _vehicle.value,
+            route = null
+        )
+        _uiState.update { it.copy(batteryState = batteryState) }
+    }
+
+    /**
      * Calculate route from current location to destination
      *
      * Validates destination, calls use case, decodes polyline, and updates UI state
@@ -111,12 +127,19 @@ class MapViewModel @Inject constructor(
                         emptyList<LatLng>()
                     }
 
+                    // Calculate battery state for this route
+                    val batteryState = calculateBatteryUseCase(
+                        vehicle = _vehicle.value,
+                        route = route
+                    )
+
                     _uiState.update {
                         it.copy(
                             route = route,
                             routePoints = routePoints,
                             isCalculatingRoute = false,
-                            routeError = null
+                            routeError = null,
+                            batteryState = batteryState
                         )
                     }
                 },
@@ -138,11 +161,18 @@ class MapViewModel @Inject constructor(
      * Clear the current route and reset route-related state
      */
     fun clearRoute() {
+        // Recalculate battery state without route
+        val batteryState = calculateBatteryUseCase(
+            vehicle = _vehicle.value,
+            route = null
+        )
+
         _uiState.update {
             it.copy(
                 route = null,
                 routePoints = emptyList(),
-                routeError = null
+                routeError = null,
+                batteryState = batteryState
             )
         }
     }
@@ -165,6 +195,8 @@ data class MapUiState(
     val route: Route? = null,
     val isCalculatingRoute: Boolean = false,
     val routeError: String? = null,
-    val routePoints: List<LatLng> = emptyList()
+    val routePoints: List<LatLng> = emptyList(),
+    // Phase 3: Battery state
+    val batteryState: BatteryState? = null
 )
 
