@@ -222,7 +222,7 @@ fun MapScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // EV Dashboard (always shown when battery state available)
-                uiState.batteryState?.let { batteryState ->
+                uiState.batteryState?.let { batteryState: com.example.voltroute.domain.model.BatteryState ->
                     EvDashboard(
                         batteryState = batteryState,
                         modifier = Modifier.fillMaxWidth()
@@ -230,13 +230,12 @@ fun MapScreen(
                 }
 
                 // Route Info Card (shown when route calculated)
-                uiState.route?.let { route ->
+                uiState.route?.let { route: com.example.voltroute.domain.model.Route ->
                     RouteInfoCard(
                         route = route,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                )
             }
 
             // Loading indicator for location
