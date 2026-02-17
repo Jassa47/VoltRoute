@@ -14,7 +14,10 @@ import com.example.voltroute.domain.model.Vehicle
 import com.example.voltroute.domain.usecase.CalculateBatteryUseCase
 import com.example.voltroute.domain.usecase.CalculateRouteUseCase
 import com.example.voltroute.domain.usecase.FindChargersUseCase
+import com.example.voltroute.domain.usecase.LoadFromCacheUseCase
 import com.example.voltroute.domain.usecase.PlanChargingStopsUseCase
+import com.example.voltroute.domain.usecase.SaveToCacheUseCase
+import com.example.voltroute.utils.NetworkMonitor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +34,10 @@ class MapViewModel @Inject constructor(
     private val calculateRouteUseCase: CalculateRouteUseCase,
     private val calculateBatteryUseCase: CalculateBatteryUseCase,
     private val findChargersUseCase: FindChargersUseCase,
-    private val planChargingStopsUseCase: PlanChargingStopsUseCase
+    private val planChargingStopsUseCase: PlanChargingStopsUseCase,
+    private val saveToCacheUseCase: SaveToCacheUseCase,
+    private val loadFromCacheUseCase: LoadFromCacheUseCase,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -43,6 +49,8 @@ class MapViewModel @Inject constructor(
     init {
         checkLocationPermission()
         calculateInitialBatteryState()
+        observeNetworkStatus()
+        checkForCachedData()
     }
 
     private fun checkLocationPermission() {
@@ -230,6 +238,18 @@ class MapViewModel @Inject constructor(
                             chargingPlan = plan
                         )
                     }
+
+                    // Auto-save to cache after successful charger search
+                    _uiState.value.route?.let { route ->
+                        viewModelScope.launch {
+                            saveToCacheUseCase(
+                                route = route,
+                                destinationAddress = _uiState.value.destinationAddress,
+                                chargers = chargers,
+                                chargingPlan = plan
+                            )
+                        }
+                    }
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -327,6 +347,128 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    // ==================== OFFLINE MODE FUNCTIONS ====================
+
+    /**
+     * Observe network connectivity status
+     *
+     * Collects from NetworkMonitor's isOnline flow and updates UI state.
+     * Updates both isOnline (network status) and isOfflineMode (user-facing) flags.
+     *
+     * Runs continuously for the lifetime of the ViewModel.
+     */
+    private fun observeNetworkStatus() {
+        viewModelScope.launch {
+            networkMonitor.isOnline.collect { online ->
+                _uiState.update {
+                    it.copy(
+                        isOnline = online,
+                        isOfflineMode = !online
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Check for cached data on app start
+     *
+     * Loads cache metadata (not the actual data) to:
+     * - Show if cache exists
+     * - Display cache age
+     * - Enable "Load from Cache" button
+     *
+     * Called in init block.
+     */
+    private fun checkForCachedData() {
+        viewModelScope.launch {
+            val cached = loadFromCacheUseCase()
+            _uiState.update {
+                it.copy(
+                    hasCachedRoute = cached.routeData != null,
+                    hasCachedChargers = cached.chargers.isNotEmpty(),
+                    cacheAgeText = cached.cacheAgeText
+                )
+            }
+        }
+    }
+
+    /**
+     * Load cached data and restore app state
+     *
+     * Called when user taps "Load from Cache" or app is in offline mode.
+     * Restores:
+     * - Last calculated route with polyline
+     * - Destination address (search field)
+     * - Battery state for that route
+     * - Found chargers
+     * - Charging plan (if existed)
+     *
+     * After loading, exits offline mode (data is now available).
+     */
+    fun loadCachedData() {
+        viewModelScope.launch {
+            val cached = loadFromCacheUseCase()
+
+            // Restore route data
+            cached.routeData?.let { routeData ->
+                // Decode polyline for map display
+                val points = PolyUtil.decode(routeData.data.polylinePoints)
+
+                // Recalculate battery state for cached route
+                val batteryState = calculateBatteryUseCase(
+                    vehicle = _vehicle.value,
+                    route = routeData.data
+                )
+
+                _uiState.update {
+                    it.copy(
+                        route = routeData.data,
+                        routePoints = points,
+                        destinationAddress = routeData.destinationAddress,
+                        batteryState = batteryState,
+                        isOfflineMode = false  // Exit offline mode after loading
+                    )
+                }
+            }
+
+            // Restore chargers
+            if (cached.chargers.isNotEmpty()) {
+                _uiState.update {
+                    it.copy(
+                        chargers = cached.chargers,
+                        showChargers = true
+                    )
+                }
+            }
+
+            // Restore charging plan
+            cached.chargingPlan?.let { plan ->
+                _uiState.update {
+                    it.copy(chargingPlan = plan)
+                }
+            }
+        }
+    }
+
+    /**
+     * Retry network connection check
+     *
+     * Called when user taps "Retry" in offline mode banner.
+     * Synchronously checks current network status and updates UI.
+     *
+     * Uses isCurrentlyOnline() for immediate check (not flow-based).
+     */
+    fun retryConnection() {
+        val isOnline = networkMonitor.isCurrentlyOnline()
+        _uiState.update {
+            it.copy(
+                isOnline = isOnline,
+                isOfflineMode = !isOnline
+            )
+        }
+    }
+
     /**
      * Cancel charger swap operation
      * Clears the swappingStop to exit swap mode
@@ -357,6 +499,12 @@ data class MapUiState(
     val showChargers: Boolean = false,
     // Phase 5: Charging plan
     val chargingPlan: ChargingPlan? = null,
-    val swappingStop: ChargingStop? = null
+    val swappingStop: ChargingStop? = null,
+    // Phase 6: Offline mode
+    val isOnline: Boolean = true,
+    val isOfflineMode: Boolean = false,
+    val cacheAgeText: String = "",
+    val hasCachedRoute: Boolean = false,
+    val hasCachedChargers: Boolean = false
 )
 
