@@ -35,7 +35,8 @@ import com.google.maps.android.compose.*
 
 @Composable
 fun MapScreen(
-    viewModel: MapViewModel = hiltViewModel()
+    viewModel: MapViewModel = hiltViewModel(),
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val vehicle by viewModel.vehicle.collectAsState()
