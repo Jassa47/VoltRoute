@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.voltroute.presentation.map.components.DestinationInput
+import com.example.voltroute.presentation.map.components.EvDashboard
 import com.example.voltroute.presentation.map.components.RouteInfoCard
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -212,12 +213,29 @@ fun MapScreen(
                     }
                 }
             }
+            // Bottom content: EV Dashboard and Route Info
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // EV Dashboard (always shown when battery state available)
+                uiState.batteryState?.let { batteryState ->
+                    EvDashboard(
+                        batteryState = batteryState,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-            // Route Info Card at bottom
-            if (uiState.route != null) {
-                RouteInfoCard(
-                    route = uiState.route!!,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                // Route Info Card (shown when route calculated)
+                uiState.route?.let { route ->
+                    RouteInfoCard(
+                        route = route,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 )
             }
 
