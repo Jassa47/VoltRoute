@@ -2,6 +2,7 @@ package com.example.voltroute.di
 
 import com.example.voltroute.BuildConfig
 import com.example.voltroute.data.remote.api.DirectionsApi
+import com.example.voltroute.data.remote.api.OpenChargeMapApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,7 +73,7 @@ object AppModule {
     }
 
     /**
-     * Provide configured Retrofit instance
+     * Provide configured Retrofit instance for Google Maps APIs
      *
      * Retrofit converts HTTP API into a Java/Kotlin interface
      *
@@ -81,7 +82,8 @@ object AppModule {
      */
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    @Named("google_retrofit")
+    fun provideGoogleRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://maps.googleapis.com/")
             .client(okHttpClient)
@@ -94,13 +96,61 @@ object AppModule {
      *
      * Retrofit generates the implementation from the interface definition
      *
-     * @param retrofit Configured Retrofit instance
+     * @param retrofit Configured Retrofit instance for Google Maps
      * @return DirectionsApi implementation ready for use
      */
     @Provides
     @Singleton
-    fun provideDirectionsApi(retrofit: Retrofit): DirectionsApi {
+    fun provideDirectionsApi(
+        @Named("google_retrofit") retrofit: Retrofit
+    ): DirectionsApi {
         return retrofit.create(DirectionsApi::class.java)
+    }
+
+    /**
+     * Provide Open Charge Map API key from BuildConfig
+     *
+     * The key is loaded from local.properties by the secrets-gradle-plugin
+     * and exposed via BuildConfig.OPEN_CHARGE_MAP_KEY
+     */
+    @Provides
+    @Singleton
+    @Named("ocm_api_key")
+    fun provideOcmApiKey(): String {
+        return BuildConfig.OPEN_CHARGE_MAP_KEY
+    }
+
+    /**
+     * Provide configured Retrofit instance for Open Charge Map API
+     *
+     * @param okHttpClient Provided OkHttpClient for network calls
+     * @return Configured Retrofit instance for Open Charge Map
+     */
+    @Provides
+    @Singleton
+    @Named("ocm_retrofit")
+    fun provideOcmRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.openchargemap.io/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    /**
+     * Provide OpenChargeMapApi implementation
+     *
+     * Retrofit generates the implementation from the interface definition
+     *
+     * @param retrofit Configured Retrofit instance for Open Charge Map
+     * @return OpenChargeMapApi implementation ready for use
+     */
+    @Provides
+    @Singleton
+    fun provideOpenChargeMapApi(
+        @Named("ocm_retrofit") retrofit: Retrofit
+    ): OpenChargeMapApi {
+        return retrofit.create(OpenChargeMapApi::class.java)
     }
 }
 
