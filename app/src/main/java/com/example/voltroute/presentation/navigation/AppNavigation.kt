@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.voltroute.domain.model.VehiclePreset
+import com.example.voltroute.presentation.history.TripHistoryScreen
 import com.example.voltroute.presentation.map.MapScreen
 import com.example.voltroute.presentation.settings.SettingsScreen
 import com.example.voltroute.presentation.splash.SplashScreen
@@ -23,6 +24,7 @@ object AppRoutes {
     const val SPLASH = "splash"
     const val MAP = "map"
     const val SETTINGS = "settings"
+    const val HISTORY = "history"
 }
 
 /**
@@ -95,6 +97,9 @@ fun AppNavigation(
             MapScreen(
                 onNavigateToSettings = {
                     navController.navigate(AppRoutes.SETTINGS)
+                },
+                onNavigateToHistory = {
+                    navController.navigate(AppRoutes.HISTORY)
                 }
             )
         }
@@ -123,6 +128,32 @@ fun AppNavigation(
                 isDarkMode = isDarkMode,
                 onVehicleSelected = onVehicleSelected,
                 onThemeChanged = onThemeChanged,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // TRIP HISTORY SCREEN
+        // Slide in from right (same as Settings), slide out to right on back
+        composable(
+            route = AppRoutes.HISTORY,
+            // Enter when navigating forward: slide in from right
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            // Exit when navigating back: slide out to right
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            TripHistoryScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

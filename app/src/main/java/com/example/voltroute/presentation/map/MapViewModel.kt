@@ -17,6 +17,7 @@ import com.example.voltroute.domain.usecase.FindChargersUseCase
 import com.example.voltroute.domain.usecase.LoadFromCacheUseCase
 import com.example.voltroute.domain.usecase.PlanChargingStopsUseCase
 import com.example.voltroute.domain.usecase.SaveToCacheUseCase
+import com.example.voltroute.domain.usecase.SaveTripHistoryUseCase
 import com.example.voltroute.utils.NetworkMonitor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
@@ -37,7 +38,8 @@ class MapViewModel @Inject constructor(
     private val planChargingStopsUseCase: PlanChargingStopsUseCase,
     private val saveToCacheUseCase: SaveToCacheUseCase,
     private val loadFromCacheUseCase: LoadFromCacheUseCase,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val saveTripHistoryUseCase: SaveTripHistoryUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -247,6 +249,21 @@ class MapViewModel @Inject constructor(
                                 destinationAddress = _uiState.value.destinationAddress,
                                 chargers = chargers,
                                 chargingPlan = plan
+                            )
+                        }
+                    }
+
+                    // Auto-save to trip history
+                    // Runs in separate coroutine so it doesn't block UI updates
+                    _uiState.value.route?.let { route ->
+                        viewModelScope.launch {
+                            saveTripHistoryUseCase(
+                                route = route,
+                                vehicle = _vehicle.value,
+                                vehicleName = "Rivian R1T",
+                                destinationAddress = _uiState.value.destinationAddress,
+                                chargingPlan = plan,
+                                estimatedCostDollars = 0.0
                             )
                         }
                     }
