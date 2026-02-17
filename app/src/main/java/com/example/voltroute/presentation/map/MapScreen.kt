@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EvStation
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.example.voltroute.presentation.map.components.ChargerInfoCard
 import com.example.voltroute.presentation.map.components.ChargingPlanCard
 import com.example.voltroute.presentation.map.components.DestinationInput
 import com.example.voltroute.presentation.map.components.EvDashboard
+import com.example.voltroute.presentation.map.components.OfflineModeScreen
 import com.example.voltroute.presentation.map.components.RouteInfoCard
 import com.example.voltroute.presentation.map.components.getPowerLevelColor
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -88,7 +90,45 @@ fun MapScreen(
         }
     }
 
-    Scaffold(
+    // Offline mode detection - show special screen when no internet
+    if (uiState.isOfflineMode) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("VoltRoute")
+                            Icon(
+                                imageVector = Icons.Default.WifiOff,
+                                contentDescription = "Offline",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                )
+            }
+        ) { padding ->
+            OfflineModeScreen(
+                cacheAgeText = uiState.cacheAgeText,
+                hasCachedRoute = uiState.hasCachedRoute,
+                hasCachedChargers = uiState.hasCachedChargers,
+                onViewCachedRoute = { viewModel.loadCachedData() },
+                onViewCachedChargers = { viewModel.loadCachedData() },
+                onRetry = { viewModel.retryConnection() },
+                modifier = Modifier.padding(padding)
+            )
+        }
+    } else {
+        // Normal online mode - show map and all features
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("VoltRoute") },
@@ -422,6 +462,7 @@ fun MapScreen(
             }
         }
     }
+    } // End of else block (online mode)
 }
 
 /**
