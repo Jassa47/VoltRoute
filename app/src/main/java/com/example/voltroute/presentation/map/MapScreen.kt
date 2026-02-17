@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.voltroute.domain.model.Charger
 import com.example.voltroute.domain.model.PowerLevel
 import com.example.voltroute.presentation.map.components.ChargerInfoCard
+import com.example.voltroute.presentation.map.components.ChargingPlanCard
 import com.example.voltroute.presentation.map.components.DestinationInput
 import com.example.voltroute.presentation.map.components.EvDashboard
 import com.example.voltroute.presentation.map.components.RouteInfoCard
@@ -158,11 +159,34 @@ fun MapScreen(
                         ChargerMarker(
                             charger = charger,
                             onClick = {
-                                viewModel.onChargerSelected(charger)
+                                if (uiState.swappingStop != null) {
+                                    // In swap mode - replace the stop!
+                                    viewModel.onChargerSelectedAsSwap(charger)
+                                } else {
+                                    // Normal mode - show info card
+                                    viewModel.onChargerSelected(charger)
+                                }
                                 true
                             }
                         )
                     }
+                }
+
+                // Charging stop markers (green, numbered - these are the recommended stops)
+                uiState.chargingPlan?.stops?.forEach { stop ->
+                    Marker(
+                        state = rememberMarkerState(
+                            position = LatLng(
+                                stop.charger.location.latitude,
+                                stop.charger.location.longitude
+                            )
+                        ),
+                        title = "Stop ${stop.stopNumber}: ${stop.charger.name}",
+                        snippet = "${stop.charger.powerText} • ${stop.chargeTimeText}",
+                        icon = BitmapDescriptorFactory.defaultMarker(
+                            BitmapDescriptorFactory.HUE_GREEN
+                        )
+                    )
                 }
             }
 
@@ -172,6 +196,40 @@ fun MapScreen(
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
             ) {
+                // Swap mode banner (appears when user is selecting replacement charger)
+                uiState.swappingStop?.let { swappingStop ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Tap a charger to replace Stop ${swappingStop.stopNumber}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            TextButton(
+                                onClick = { viewModel.cancelSwap() }
+                            ) {
+                                Text(
+                                    text = "Cancel",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -269,7 +327,7 @@ fun MapScreen(
                     }
                 }
             }
-            // Bottom content: Charger Info, EV Dashboard, and Route Info
+            // Bottom content: Charger Info, Charging Plan, EV Dashboard, and Route Info
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -277,14 +335,21 @@ fun MapScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // 1. Charger Info Card (slides up when station selected)
+                // 1. Charger Info Card (slides up when marker tapped)
                 ChargerInfoCard(
                     charger = uiState.selectedCharger,
                     onDismiss = viewModel::onChargerDismissed,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // 2. EV Dashboard (always shown when battery state available)
+                // 2. Charging Plan Card (expanded by default, collapsible)
+                ChargingPlanCard(
+                    chargingPlan = uiState.chargingPlan,
+                    onSwapStop = viewModel::onSwapStop,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 3. EV Dashboard (collapsed by default)
                 uiState.batteryState?.let { batteryState: com.example.voltroute.domain.model.BatteryState ->
                     EvDashboard(
                         batteryState = batteryState,
@@ -292,7 +357,7 @@ fun MapScreen(
                     )
                 }
 
-                // 3. Route Info Card (shown when route calculated)
+                // 4. Route Info Card (shown when route calculated)
                 uiState.route?.let { route: com.example.voltroute.domain.model.Route ->
                     RouteInfoCard(
                         route = route,

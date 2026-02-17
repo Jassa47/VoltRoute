@@ -326,6 +326,14 @@ class MapViewModel @Inject constructor(
             )
         }
     }
+
+    /**
+     * Cancel charger swap operation
+     * Clears the swappingStop to exit swap mode
+     */
+    fun cancelSwap() {
+        _uiState.update { it.copy(swappingStop = null) }
+    }
 }
 
 data class MapUiState(
