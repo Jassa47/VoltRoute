@@ -245,6 +245,13 @@ class MapViewModel @Inject constructor(
     }
 
     /**
+     * Clear charger error message
+     */
+    fun clearChargerError() {
+        _uiState.update { it.copy(chargerError = null) }
+    }
+
+    /**
      * Toggle charger markers visibility on map
      * Automatically finds chargers if not already loaded
      */
