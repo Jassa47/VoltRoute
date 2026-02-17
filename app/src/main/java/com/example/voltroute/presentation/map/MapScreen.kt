@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EvStation
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.voltroute.domain.model.Charger
@@ -35,7 +37,8 @@ import com.google.maps.android.compose.*
 
 @Composable
 fun MapScreen(
-    viewModel: MapViewModel = hiltViewModel()
+    viewModel: MapViewModel = hiltViewModel(),
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val vehicle by viewModel.vehicle.collectAsState()
@@ -131,7 +134,20 @@ fun MapScreen(
         Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("VoltRoute") },
+                title = {
+                    Text(
+                        text = "VoltRoute",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

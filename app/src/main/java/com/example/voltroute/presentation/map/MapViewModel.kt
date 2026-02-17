@@ -476,6 +476,33 @@ class MapViewModel @Inject constructor(
     fun cancelSwap() {
         _uiState.update { it.copy(swappingStop = null) }
     }
+
+    /**
+     * Update vehicle from preset selection
+     *
+     * Preserves current battery percentage when switching vehicles.
+     * Recalculates battery state with new vehicle specs.
+     *
+     * @param preset The selected vehicle preset
+     */
+    fun updateVehicle(preset: com.example.voltroute.domain.model.VehiclePreset) {
+        // Update vehicle while preserving current battery percentage
+        _vehicle.update { preset.toVehicle(it.currentBatteryPercent) }
+
+        // Recalculate battery state with new vehicle specs
+        val batteryState = calculateBatteryUseCase(
+            vehicle = _vehicle.value,
+            route = _uiState.value.route
+        )
+
+        // Update UI state with new battery state and preset ID
+        _uiState.update {
+            it.copy(
+                batteryState = batteryState,
+                selectedPresetId = preset.id
+            )
+        }
+    }
 }
 
 data class MapUiState(
@@ -505,6 +532,8 @@ data class MapUiState(
     val isOfflineMode: Boolean = false,
     val cacheAgeText: String = "",
     val hasCachedRoute: Boolean = false,
-    val hasCachedChargers: Boolean = false
+    val hasCachedChargers: Boolean = false,
+    // Phase 6: Vehicle preset selection
+    val selectedPresetId: String = com.example.voltroute.domain.model.VehiclePreset.DEFAULT.id
 )
 
