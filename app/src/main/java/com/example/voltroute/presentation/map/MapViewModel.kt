@@ -6,12 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.voltroute.data.location.LocationClient
 import com.example.voltroute.domain.model.BatteryState
 import com.example.voltroute.domain.model.Charger
+import com.example.voltroute.domain.model.ChargingPlan
+import com.example.voltroute.domain.model.ChargingStop
 import com.example.voltroute.domain.model.Location
 import com.example.voltroute.domain.model.Route
 import com.example.voltroute.domain.model.Vehicle
 import com.example.voltroute.domain.usecase.CalculateBatteryUseCase
 import com.example.voltroute.domain.usecase.CalculateRouteUseCase
 import com.example.voltroute.domain.usecase.FindChargersUseCase
+import com.example.voltroute.domain.usecase.PlanChargingStopsUseCase
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +30,8 @@ class MapViewModel @Inject constructor(
     private val locationClient: LocationClient,
     private val calculateRouteUseCase: CalculateRouteUseCase,
     private val calculateBatteryUseCase: CalculateBatteryUseCase,
-    private val findChargersUseCase: FindChargersUseCase
+    private val findChargersUseCase: FindChargersUseCase,
+    private val planChargingStopsUseCase: PlanChargingStopsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -208,12 +212,22 @@ class MapViewModel @Inject constructor(
 
             result
                 .onSuccess { chargers ->
+                    // Calculate charging plan if route exists
+                    val plan = _uiState.value.route?.let { route ->
+                        planChargingStopsUseCase(
+                            route = route,
+                            vehicle = _vehicle.value,
+                            availableChargers = chargers
+                        )
+                    }
+
                     _uiState.update {
                         it.copy(
                             chargers = chargers,
                             isLoadingChargers = false,
                             showChargers = true,
-                            chargerError = null
+                            chargerError = null,
+                            chargingPlan = plan
                         )
                     }
                 }
@@ -266,6 +280,52 @@ class MapViewModel @Inject constructor(
             _uiState.update { it.copy(showChargers = !currentlyShowing) }
         }
     }
+
+    /**
+     * Start the process of swapping a charging stop
+     * Sets the stop to be swapped and shows chargers for selection
+     */
+    fun onSwapStop(stop: ChargingStop) {
+        _uiState.update {
+            it.copy(
+                swappingStop = stop,
+                showChargers = true
+            )
+        }
+    }
+
+    /**
+     * Replace a charging stop with a different charger
+     * Recalculates the plan with the new charger
+     */
+    fun onChargerSelectedAsSwap(charger: Charger) {
+        val swapping = _uiState.value.swappingStop ?: return
+        val currentPlan = _uiState.value.chargingPlan ?: return
+
+        // Update the stop with the new charger
+        val updatedStops = currentPlan.stops.map { stop ->
+            if (stop.stopNumber == swapping.stopNumber) {
+                stop.copy(charger = charger)
+            } else {
+                stop
+            }
+        }
+
+        // Recalculate total times
+        val totalChargingMins = updatedStops.sumOf { it.estimatedChargeTimeMinutes }
+        val updatedPlan = currentPlan.copy(
+            stops = updatedStops,
+            totalChargingTimeMinutes = totalChargingMins,
+            totalTripTimeMinutes = currentPlan.routeDurationMinutes + totalChargingMins
+        )
+
+        _uiState.update {
+            it.copy(
+                chargingPlan = updatedPlan,
+                swappingStop = null
+            )
+        }
+    }
 }
 
 data class MapUiState(
@@ -286,6 +346,9 @@ data class MapUiState(
     val selectedCharger: Charger? = null,
     val isLoadingChargers: Boolean = false,
     val chargerError: String? = null,
-    val showChargers: Boolean = false
+    val showChargers: Boolean = false,
+    // Phase 5: Charging plan
+    val chargingPlan: ChargingPlan? = null,
+    val swappingStop: ChargingStop? = null
 )
 
