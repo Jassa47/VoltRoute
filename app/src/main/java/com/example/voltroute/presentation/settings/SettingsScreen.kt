@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Card
@@ -42,7 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.voltroute.domain.model.VehiclePreset
+import com.example.voltroute.presentation.auth.AuthViewModel
 
 /**
  * SettingsScreen - Application settings and preferences
@@ -184,6 +187,43 @@ fun SettingsScreen(
                             imageVector = Icons.Default.Code,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                )
+            }
+
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            // ==================== SECTION 4: ACCOUNT ====================
+            item {
+                SettingsSectionHeader(
+                    icon = Icons.Default.Logout,
+                    title = "Account"
+                )
+            }
+
+            item {
+                val authViewModel: AuthViewModel = hiltViewModel()
+
+                ListItem(
+                    modifier = Modifier.clickable {
+                        authViewModel.signOut()
+                    },
+                    headlineContent = {
+                        Text("Sign Out")
+                    },
+                    supportingContent = {
+                        Text("Log out of your account")
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 )

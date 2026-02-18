@@ -12,6 +12,8 @@ import com.example.voltroute.data.local.dao.TripHistoryDao
 import com.example.voltroute.data.local.database.VoltRouteDatabase
 import com.example.voltroute.data.remote.api.DirectionsApi
 import com.example.voltroute.data.remote.api.OpenChargeMapApi
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.Module
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -294,6 +296,45 @@ object AppModule {
     @Provides
     fun provideTripHistoryDao(database: VoltRouteDatabase): TripHistoryDao {
         return database.tripHistoryDao()
+    }
+
+    /**
+     * Provide Firebase Authentication instance
+     *
+     * FirebaseAuth.getInstance() returns a singleton managed by Firebase SDK.
+     * Safe to call multiple times - always returns the same instance.
+     *
+     * Used for:
+     * - Email/Password authentication
+     * - Phone number authentication
+     * - Auth state monitoring
+     * - User session management
+     *
+     * @return FirebaseAuth singleton instance
+     */
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
+
+    /**
+     * Provide Firebase Firestore instance
+     *
+     * FirebaseFirestore.getInstance() returns a singleton managed by Firebase SDK.
+     * Safe to call multiple times - always returns the same instance.
+     *
+     * Used for:
+     * - User profile storage
+     * - Real-time data sync
+     * - Cloud database operations
+     *
+     * @return FirebaseFirestore singleton instance
+     */
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }
 

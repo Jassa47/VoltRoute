@@ -141,18 +141,18 @@ fun MapScreen(
                         text = "VoltRoute",
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "Trip History"
-                        )
-                    }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings"
+                        )
+                    }
+                    IconButton(onClick = onNavigateToHistory) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = "Trip History"
                         )
                     }
                 },

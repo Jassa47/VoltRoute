@@ -5,12 +5,18 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.voltroute.data.auth.AuthState
 import com.example.voltroute.domain.model.VehiclePreset
+import com.example.voltroute.presentation.auth.LoginScreen
+import com.example.voltroute.presentation.auth.PhoneAuthScreen
+import com.example.voltroute.presentation.auth.SignUpScreen
 import com.example.voltroute.presentation.history.TripHistoryScreen
 import com.example.voltroute.presentation.map.MapScreen
 import com.example.voltroute.presentation.settings.SettingsScreen
@@ -22,6 +28,9 @@ import com.example.voltroute.presentation.splash.SplashScreen
  */
 object AppRoutes {
     const val SPLASH = "splash"
+    const val LOGIN = "login"
+    const val SIGNUP = "signup"
+    const val PHONE_AUTH = "phone_auth"
     const val MAP = "map"
     const val SETTINGS = "settings"
     const val HISTORY = "history"
@@ -30,32 +39,47 @@ object AppRoutes {
 /**
  * AppNavigation - Top-level navigation graph
  *
- * Navigation flow:
- * SPLASH -> MAP <-> SETTINGS
+ * Navigation flow with authentication:
+ * SPLASH -> LOGIN/MAP (based on authState)
+ * LOGIN <-> SIGNUP <-> PHONE_AUTH
+ * MAP <-> SETTINGS <-> HISTORY
+ *
+ * Auth flow:
+ * - If authenticated: SPLASH -> MAP
+ * - If unauthenticated: SPLASH -> LOGIN
+ * - After sign in/up: LOGIN -> MAP (clear auth backstack)
  *
  * Transitions:
  * - SPLASH exits with fade out (removed from back stack)
- * - MAP enters with fade in
+ * - LOGIN enters/exits with fade
+ * - SIGNUP slides vertically (modal feel)
+ * - PHONE_AUTH slides horizontally (forward navigation)
  * - MAP <-> SETTINGS use horizontal slide animations (Android standard)
- *   Forward: Current slides left, new slides in from right
- *   Back: Current slides right, previous slides in from left
  */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
     isDarkMode: Boolean,
     selectedPresetId: String,
+    authState: AuthState,
     onVehicleSelected: (VehiclePreset) -> Unit,
     onThemeChanged: (Boolean) -> Unit
 ) {
     val navController = rememberNavController()
 
+    // Determine start destination based on auth state
+    val startDestination = when (authState) {
+        is AuthState.Authenticated -> AppRoutes.MAP
+        AuthState.Unauthenticated -> AppRoutes.LOGIN
+        else -> AppRoutes.SPLASH
+    }
+
     NavHost(
         navController = navController,
-        startDestination = AppRoutes.SPLASH
+        startDestination = startDestination
     ) {
         // SPLASH SCREEN
-        // Shows once on app launch, then removed from back stack
+        // Shows once on app launch, then navigates based on auth state
         composable(
             route = AppRoutes.SPLASH,
             exitTransition = {
@@ -64,9 +88,98 @@ fun AppNavigation(
         ) {
             SplashScreen(
                 onSplashComplete = {
-                    navController.navigate(AppRoutes.MAP) {
+                    // Navigate to LOGIN or MAP based on auth state
+                    val destination = when (authState) {
+                        is AuthState.Authenticated -> AppRoutes.MAP
+                        else -> AppRoutes.LOGIN
+                    }
+                    navController.navigate(destination) {
                         // Remove splash from back stack so back button doesn't return to it
                         popUpTo(AppRoutes.SPLASH) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // LOGIN SCREEN
+        // Entry point for unauthenticated users
+        // Fade in/out for smooth entry
+        composable(
+            route = AppRoutes.LOGIN,
+            enterTransition = {
+                fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            LoginScreen(
+                onNavigateToSignUp = {
+                    navController.navigate(AppRoutes.SIGNUP)
+                },
+                onNavigateToPhoneAuth = {
+                    navController.navigate(AppRoutes.PHONE_AUTH)
+                },
+                onLoginSuccess = {
+                    navController.navigate(AppRoutes.MAP) {
+                        // Clear auth screens from back stack
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // SIGN UP SCREEN
+        // Modal-style slide up from bottom
+        composable(
+            route = AppRoutes.SIGNUP,
+            enterTransition = {
+                slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            SignUpScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSignUpSuccess = {
+                    navController.navigate(AppRoutes.MAP) {
+                        // Clear auth screens from back stack
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // PHONE AUTH SCREEN
+        // Standard forward navigation slide from right
+        composable(
+            route = AppRoutes.PHONE_AUTH,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            PhoneAuthScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAuthSuccess = {
+                    navController.navigate(AppRoutes.MAP) {
+                        // Clear auth screens from back stack
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
                     }
                 }
             )
