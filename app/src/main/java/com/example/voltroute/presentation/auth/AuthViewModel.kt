@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.voltroute.data.auth.AuthRepository
 import com.example.voltroute.data.auth.AuthState
 import com.example.voltroute.data.auth.PhoneAuthResult
+import com.example.voltroute.domain.usecase.CreateUserDocumentUseCase
 import com.example.voltroute.domain.usecase.SignInWithEmailUseCase
 import com.example.voltroute.domain.usecase.SignOutUseCase
 import com.example.voltroute.domain.usecase.SignUpWithEmailUseCase
@@ -44,6 +45,7 @@ data class AuthUiState(
  * Manages authentication operations and UI state:
  * - Email/Password sign in and sign up
  * - Phone number authentication
+ * - Firestore user document creation
  * - Auth state observation
  * - Error and success message handling
  *
@@ -60,7 +62,8 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val signInWithEmailUseCase: SignInWithEmailUseCase,
     private val signUpWithEmailUseCase: SignUpWithEmailUseCase,
-    private val signOutUseCase: SignOutUseCase
+    private val signOutUseCase: SignOutUseCase,
+    private val createUserDocumentUseCase: CreateUserDocumentUseCase
 ) : ViewModel() {
 
     /**
@@ -103,11 +106,16 @@ class AuthViewModel @Inject constructor(
      * Process:
      * 1. Set loading state
      * 2. Call use case (validates + calls repository)
-     * 3. On success: Show welcome message
+     * 3. On success: Create/update Firestore document, show welcome message
      * 4. On failure: Show error message
      *
      * AuthState will automatically update to Authenticated on success,
      * triggering navigation in UI.
+     *
+     * Firestore document creation:
+     * - Creates user document if doesn't exist
+     * - Updates lastSyncedAt if exists (using merge)
+     * - Safe to call on every login
      *
      * @param email User's email address
      * @param password User's password
@@ -117,7 +125,10 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             signInWithEmailUseCase(email, password)
-                .onSuccess {
+                .onSuccess { firebaseUser ->
+                    // Create/update Firestore document (safe with merge)
+                    createUserDocumentUseCase(firebaseUser)
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -142,12 +153,17 @@ class AuthViewModel @Inject constructor(
      * Process:
      * 1. Set loading state
      * 2. Call use case (validates passwords match + calls repository)
-     * 3. On success: Show success message with email verification reminder
+     * 3. On success: Create Firestore document, show success message
      * 4. On failure: Show error message
      *
      * Email verification is sent automatically by repository.
      * User can sign in even without verification, but some features
      * may be restricted.
+     *
+     * Firestore document creation:
+     * - Creates user document with default settings
+     * - If Firestore fails, auth still succeeds (logged but not blocking)
+     * - User can still use app, document will be created on next login
      *
      * @param email User's email address
      * @param password User's password
@@ -162,13 +178,31 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             signUpWithEmailUseCase(email, password, confirmPassword)
-                .onSuccess {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            successMessage = "Account created! Please verify your email."
-                        )
-                    }
+                .onSuccess { firebaseUser ->
+                    // Create Firestore document for new user
+                    createUserDocumentUseCase(firebaseUser)
+                        .onSuccess {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    successMessage = "Account created! Please verify your email."
+                                )
+                            }
+                        }
+                        .onFailure { firestoreError ->
+                            // Auth succeeded but Firestore failed
+                            // User can still use app, just log the error
+                            android.util.Log.e(
+                                "AuthViewModel",
+                                "Failed to create Firestore document: ${firestoreError.message}"
+                            )
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    successMessage = "Account created!"
+                                )
+                            }
+                        }
                 }
                 .onFailure { exception ->
                     _uiState.update {
@@ -243,8 +277,13 @@ class AuthViewModel @Inject constructor(
      * 1. Check if verificationId exists (from sendPhoneCode)
      * 2. Set loading state
      * 3. Call repository to verify code
-     * 4. On success: Show success message, authState updates to Authenticated
+     * 4. On success: Create Firestore document, show success message
      * 5. On failure: Show error message
+     *
+     * Firestore document creation:
+     * - Creates user document for phone auth users
+     * - Email will be null (phone-only account)
+     * - Uses same default settings as email signup
      *
      * @param code 6-digit SMS code entered by user
      */
@@ -259,7 +298,10 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             authRepository.verifyPhoneCode(verificationId, code)
-                .onSuccess {
+                .onSuccess { firebaseUser ->
+                    // Create Firestore document for phone user
+                    createUserDocumentUseCase(firebaseUser)
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,

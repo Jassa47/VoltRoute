@@ -1,5 +1,7 @@
 package com.example.voltroute.presentation.auth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,6 +55,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.painterResource
+import com.example.voltroute.R
 import com.example.voltroute.data.auth.AuthState
 
 /**
@@ -148,7 +153,8 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -158,24 +164,19 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Logo emoji
-                Text(
-                    text = "⚡",
-                    style = MaterialTheme.typography.displayLarge
-                )
-
-                // App name
-                Text(
-                    text = "VoltRoute",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold
+                // VoltRoute Logo (PNG)
+                Image(
+                    painter = painterResource(id = R.drawable.voltroutelogo),
+                    contentDescription = "VoltRoute Logo",
+                    modifier = Modifier.size(160.dp)
                 )
 
                 // Welcome text
                 Text(
                     text = "Welcome back!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -184,9 +185,9 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Email", color = Color.White) },
                     leadingIcon = {
-                        Icon(Icons.Default.Email, contentDescription = null)
+                        Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -196,16 +197,25 @@ fun LoginScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                    )
                 )
 
                 // Password field
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Password", color = Color.White) },
                     leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null)
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White)
                     },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -217,7 +227,8 @@ fun LoginScreen(
                                 contentDescription = if (passwordVisible)
                                     "Hide password"
                                 else
-                                    "Show password"
+                                    "Show password",
+                                tint = Color.White
                             )
                         }
                     },
@@ -236,7 +247,16 @@ fun LoginScreen(
                         }
                     ),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                    )
                 )
 
                 // Sign In button
@@ -267,7 +287,7 @@ fun LoginScreen(
                     Text(
                         text = "OR",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White
                     )
                     HorizontalDivider(modifier = Modifier.weight(1f))
                 }
@@ -280,10 +300,11 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Phone,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sign in with Phone")
+                    Text("Sign in with Phone", color = Color.White)
                 }
 
                 // Sign up link
@@ -294,7 +315,7 @@ fun LoginScreen(
                     Text(
                         text = "Don't have an account?",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White
                     )
                     TextButton(onClick = onNavigateToSignUp) {
                         Text("Sign Up")

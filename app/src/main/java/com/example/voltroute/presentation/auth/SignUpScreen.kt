@@ -1,5 +1,7 @@
 package com.example.voltroute.presentation.auth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,6 +55,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.painterResource
+import com.example.voltroute.R
 import com.example.voltroute.data.auth.AuthState
 import kotlinx.coroutines.delay
 
@@ -190,7 +195,8 @@ fun SignUpScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -200,17 +206,19 @@ fun SignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Logo emoji
-                Text(
-                    text = "⚡",
-                    style = MaterialTheme.typography.displayMedium
+                // VoltRoute Logo (PNG)
+                Image(
+                    painter = painterResource(id = R.drawable.voltroutelogo),
+                    contentDescription = "VoltRoute Logo",
+                    modifier = Modifier.size(200.dp)
                 )
 
                 // Title
                 Text(
-                    text = "Join VoltRoute",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    text = "Create Account",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -219,9 +227,9 @@ fun SignUpScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Email", color = Color.White) },
                     leadingIcon = {
-                        Icon(Icons.Default.Email, contentDescription = null)
+                        Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -231,16 +239,25 @@ fun SignUpScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                    )
                 )
 
                 // Password field
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Password", color = Color.White) },
                     leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null)
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White)
                     },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -252,7 +269,8 @@ fun SignUpScreen(
                                 contentDescription = if (passwordVisible)
                                     "Hide password"
                                 else
-                                    "Show password"
+                                    "Show password",
+                                tint = Color.White
                             )
                         }
                     },
@@ -260,7 +278,7 @@ fun SignUpScreen(
                         VisualTransformation.None
                     else
                         PasswordVisualTransformation(),
-                    supportingText = { Text("At least 6 characters") },
+                    supportingText = { Text("At least 6 characters", color = Color.White.copy(alpha = 0.7f)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Next
@@ -269,16 +287,25 @@ fun SignUpScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                    )
                 )
 
                 // Confirm password field
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Confirm Password") },
+                    label = { Text("Confirm Password", color = Color.White) },
                     leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null)
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White)
                     },
                     trailingIcon = {
                         IconButton(onClick = {
@@ -292,7 +319,8 @@ fun SignUpScreen(
                                 contentDescription = if (confirmPasswordVisible)
                                     "Hide password"
                                 else
-                                    "Show password"
+                                    "Show password",
+                                tint = Color.White
                             )
                         }
                     },
@@ -303,7 +331,7 @@ fun SignUpScreen(
                     isError = showPasswordMismatch,
                     supportingText = {
                         if (showPasswordMismatch) {
-                            Text("Passwords do not match")
+                            Text("Passwords do not match", color = MaterialTheme.colorScheme.error)
                         }
                     },
                     keyboardOptions = KeyboardOptions(
@@ -319,7 +347,17 @@ fun SignUpScreen(
                         }
                     ),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                        errorIndicatorColor = MaterialTheme.colorScheme.error
+                    )
                 )
 
                 // Create Account button

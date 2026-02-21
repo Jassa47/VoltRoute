@@ -2,6 +2,7 @@ package com.example.voltroute.presentation.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,10 +23,11 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.voltroute.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -78,7 +81,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -88,26 +91,11 @@ fun SplashScreen(
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = spacedBy(16.dp)
         ) {
-            // Lightning bolt icon
-            Text(
-                text = "⚡",
-                fontSize = 80.sp
-            )
-
-            // App name
-            Text(
-                text = "VoltRoute",
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-
-            // Tagline
-            Text(
-                text = "EV Navigation",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
+            // VoltRoute Logo (PNG)
+            Image(
+                painter = painterResource(id = R.drawable.voltroutelogo),
+                contentDescription = "VoltRoute Logo",
+                modifier = Modifier.size(200.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -118,15 +106,15 @@ fun SplashScreen(
                 modifier = Modifier
                     .width(200.dp)
                     .height(4.dp),
-                color = MaterialTheme.colorScheme.onPrimary,
-                trackColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             )
 
             // Loading text
             Text(
                 text = "Loading...",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
         }
     }
