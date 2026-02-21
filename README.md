@@ -17,7 +17,7 @@
 
 ---
 
-## 📱 Screenshots
+##  Screenshots
 
 <p align="center">
   <img src="screenshots/map_charging_plan.png" width="200" alt="Charging Plan"/>
@@ -28,9 +28,9 @@
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🗺️ **Smart Navigation**
+###  **Smart Navigation**
 - **Real-time route calculation** using Google Directions API
 - **Interactive map** with Google Maps integration
 - **Turn-by-turn navigation** with polyline route display
@@ -44,7 +44,7 @@
 - **Real-time charging station finder** (Open Charge Map API)
 - **Battery state monitoring** with visual indicators (High/Medium/Low/Critical)
 
-### 🚗 **Vehicle Profiles**
+###  **Vehicle Profiles**
 Support for 10+ popular EV models:
 - Rivian R1T / R1S
 - Tesla Model 3 / Y / S
@@ -59,7 +59,7 @@ Each profile includes:
 - Real-world efficiency ratings
 - Estimated range calculations
 
-### 📊 **Trip Management**
+### **Trip Management**
 - **Trip history** with detailed metrics
   - Distance, duration, energy usage
   - Estimated cost per trip
@@ -67,27 +67,27 @@ Each profile includes:
 - **Swipe-to-delete** gesture support
 - **Trip statistics** and analytics
 
-### ☁️ **Cloud Sync**
+###  **Cloud Sync**
 - **Multi-device synchronization** via Firebase Firestore
 - **Real-time updates** across all logged-in devices
 - **Automatic background sync** every hour (WorkManager)
 - **Manual sync** option in settings
 - **Offline-first architecture** - works without internet
 
-### 🔐 **Authentication**
+###  **Authentication**
 - **Email/Password** authentication
 - **Phone number** authentication (SMS verification)
 - **Secure user data** storage
 - **Firebase Auth** integration
 
-### 🎨 **User Experience**
+###  **User Experience**
 - **Material Design 3** with dynamic theming
 - **Light/Dark mode** support
 - **Smooth animations** and transitions
 - **Responsive UI** adapting to all screen sizes
 - **Professional custom logo** and branding
 
-### 📴 **Offline Mode**
+###  **Offline Mode**
 - **Room database** for local data caching
 - **Works without internet** connection
 - **Automatic sync** when back online
@@ -95,7 +95,7 @@ Each profile includes:
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 VoltRoute follows **Clean Architecture** principles with clear separation of concerns:
 ```
@@ -143,7 +143,7 @@ VoltRoute follows **Clean Architecture** principles with clear separation of con
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### **Prerequisites**
 
@@ -191,11 +191,11 @@ VoltRoute follows **Clean Architecture** principles with clear separation of con
    ./gradlew build
 ```
    
-   Or open in Android Studio and click Run ▶️
+   Or open in Android Studio and click Run 
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 ```
 com.example.voltroute/
 ├── data/
@@ -259,7 +259,7 @@ Can Reach = Range Remaining ≥ Route Distance
 
 ---
 
-## 📊 Features Breakdown
+##  Features Breakdown
 
 ### **Charging Plan View**
 <img src="screenshots/map_charging_plan.png" width="300"/>
@@ -300,7 +300,7 @@ Can Reach = Range Remaining ≥ Route Distance
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ### **Unit Tests**
 ```bash
@@ -320,7 +320,7 @@ Can Reach = Range Remaining ≥ Route Distance
 
 ---
 
-## 🛣️ Roadmap
+##  Roadmap
 
 - [ ] **Cost Tracking** - Real-time electricity cost calculations
 - [ ] **Charging Notifications** - Alerts when charging complete
@@ -333,7 +333,7 @@ Can Reach = Range Remaining ≥ Route Distance
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -345,13 +345,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Your Name**
 - GitHub: [@yourusername](https://github.com/yourusername)
@@ -359,7 +359,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Google Maps Platform** for mapping and directions
 - **Open Charge Map** for charging station data
@@ -369,7 +369,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+##  Support
 
 For support, email your.email@example.com or open an issue on GitHub.
 
@@ -386,7 +386,7 @@ For support, email your.email@example.com or open an issue on GitHub.
 
 ---
 
-## 📸 **Screenshots Organization**
+##  **Screenshots Organization**
 
 Create a `screenshots/` folder in your repo root with these files:
 ```
