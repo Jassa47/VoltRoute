@@ -2,8 +2,10 @@ package com.example.voltroute.presentation.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.voltroute.data.auth.AuthRepository
 import com.example.voltroute.data.local.entity.TripHistoryEntity
 import com.example.voltroute.data.local.repository.TripHistoryRepository
+import com.example.voltroute.data.remote.sync.SyncManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +50,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class TripHistoryViewModel @Inject constructor(
-    private val tripHistoryRepository: TripHistoryRepository
+    private val tripHistoryRepository: TripHistoryRepository,
+    private val syncManager: SyncManager,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     /**
@@ -79,6 +83,14 @@ class TripHistoryViewModel @Inject constructor(
     /**
      * Delete a specific trip from history
      *
+     * Deletes from both local database and Firestore (if synced).
+     *
+     * Process:
+     * 1. Delete from local Room database
+     * 2. Check if trip was synced to cloud (has syncId)
+     * 3. If synced, delete from Firestore too
+     * 4. Real-time listener on other devices will auto-delete
+     *
      * Launched in viewModelScope so it:
      * - Runs on background thread (via repository's withContext)
      * - Cancels if ViewModel is cleared
@@ -86,10 +98,24 @@ class TripHistoryViewModel @Inject constructor(
      *
      * After deletion, trips StateFlow auto-emits updated list.
      * No manual refresh needed!
+     *
+     * @param trip The trip to delete
      */
     fun deleteTrip(trip: TripHistoryEntity) {
         viewModelScope.launch {
+            // Delete locally
             tripHistoryRepository.deleteTrip(trip)
+
+            // Delete from cloud if synced
+            if (trip.isSynced && trip.syncId != null) {
+                val currentUser = authRepository.currentUser
+                if (currentUser != null) {
+                    // Note: firestoreRepository.deleteTrip() is called directly
+                    // through the repository layer. The real-time listener on
+                    // other devices will automatically remove this trip.
+                    syncManager.deleteTrip(currentUser.uid, trip.syncId)
+                }
+            }
             // trips StateFlow automatically updates via Room's Flow!
         }
     }

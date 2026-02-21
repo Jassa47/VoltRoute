@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,6 +38,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -44,8 +49,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.voltroute.data.remote.sync.SyncManager
+import com.example.voltroute.data.remote.sync.SyncState
 import com.example.voltroute.domain.model.VehiclePreset
 import com.example.voltroute.presentation.auth.AuthViewModel
+import kotlinx.coroutines.launch
 
 /**
  * SettingsScreen - Application settings and preferences
@@ -53,11 +61,14 @@ import com.example.voltroute.presentation.auth.AuthViewModel
  * STATELESS component that receives all state from MainActivity:
  * - selectedPresetId: Currently selected vehicle
  * - isDarkMode: Current theme preference
+ * - syncManager: For cloud synchronization
  *
  * Sections:
  * 1. Vehicle Selection - List of 10 EV presets with specs
  * 2. Theme Toggle - Light/Dark mode selector
- * 3. About - App version and build info
+ * 3. Cloud Sync - Manual sync trigger with status
+ * 4. About - App version and build info
+ * 5. Account - Sign out
  *
  * UI/UX Design:
  * - Uses RadioButton for vehicle selection (single choice pattern)
@@ -72,7 +83,8 @@ fun SettingsScreen(
     isDarkMode: Boolean,
     onVehicleSelected: (VehiclePreset) -> Unit,
     onThemeChanged: (Boolean) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    syncManager: SyncManager
 ) {
     Scaffold(
         topBar = {
@@ -144,7 +156,69 @@ fun SettingsScreen(
                 )
             }
 
-            // ==================== SECTION 3: ABOUT ====================
+            // ==================== SECTION 3: CLOUD SYNC ====================
+            item {
+                SettingsSectionHeader(
+                    icon = Icons.Default.Cloud,
+                    title = "Cloud Sync"
+                )
+            }
+
+            item {
+                val syncState by syncManager.syncState.collectAsState()
+                val lastSyncTime by syncManager.lastSyncTime.collectAsState()
+                val scope = rememberCoroutineScope()
+
+                ListItem(
+                    modifier = Modifier.clickable {
+                        // Trigger manual sync
+                        scope.launch {
+                            syncManager.syncNow()
+                        }
+                    },
+                    headlineContent = { Text("Sync Now") },
+                    supportingContent = {
+                        when (syncState) {
+                            is SyncState.Idle -> {
+                                lastSyncTime?.let { time ->
+                                    val minutes = (System.currentTimeMillis() - time) / 60000
+                                    Text("Last synced: ${if (minutes < 1) "Just now" else "$minutes min ago"}")
+                                } ?: Text("Not synced yet")
+                            }
+                            is SyncState.Syncing -> Text("Syncing...")
+                            is SyncState.Success -> Text(
+                                (syncState as SyncState.Success).message,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            is SyncState.Error -> Text(
+                                (syncState as SyncState.Error).message,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    leadingContent = {
+                        when (syncState) {
+                            is SyncState.Syncing -> CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                            else -> Icon(
+                                Icons.Default.Cloud,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                )
+            }
+
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            // ==================== SECTION 4: ABOUT ====================
             item {
                 SettingsSectionHeader(
                     icon = Icons.Default.Info,
@@ -198,7 +272,7 @@ fun SettingsScreen(
                 )
             }
 
-            // ==================== SECTION 4: ACCOUNT ====================
+            // ==================== SECTION 5: ACCOUNT ====================
             item {
                 SettingsSectionHeader(
                     icon = Icons.Default.Logout,

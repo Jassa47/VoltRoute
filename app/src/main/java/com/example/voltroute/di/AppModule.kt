@@ -70,6 +70,52 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 
 /**
+ * Room database migration from version 2 to version 3
+ *
+ * Version 2: Basic trip_history table
+ * Version 3: Added cloud sync fields (syncId, lastModified, isSynced)
+ *
+ * Adds three new columns to support cloud synchronization:
+ * - syncId: Firestore document ID (NULL until synced)
+ * - lastModified: Timestamp for conflict resolution (defaults to 0 for existing trips)
+ * - isSynced: Upload status flag (defaults to 0/false for existing trips)
+ *
+ * DEFAULT values ensure existing trips get appropriate initial values:
+ * - NULL for syncId (will be set on first upload)
+ * - 0 for lastModified (existing trips treated as oldest)
+ * - 0 for isSynced (existing trips need to be uploaded)
+ *
+ * This migration preserves all existing trip data while adding sync capability.
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // Add syncId column (Firestore document ID)
+        database.execSQL(
+            """
+            ALTER TABLE trip_history 
+            ADD COLUMN syncId TEXT DEFAULT NULL
+            """.trimIndent()
+        )
+
+        // Add lastModified column (for conflict resolution)
+        database.execSQL(
+            """
+            ALTER TABLE trip_history 
+            ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0
+            """.trimIndent()
+        )
+
+        // Add isSynced column (upload status flag)
+        database.execSQL(
+            """
+            ALTER TABLE trip_history 
+            ADD COLUMN isSynced INTEGER NOT NULL DEFAULT 0
+            """.trimIndent()
+        )
+    }
+}
+
+/**
  * Hilt dependency injection module for application-wide dependencies
  *
  * Provides:
@@ -226,8 +272,11 @@ object AppModule {
      * Creates/opens the local SQLite database for offline caching and trip history.
      * Database name: "voltroute_database"
      *
-     * Includes migration from version 1 to 2 (adds trip_history table).
-     * Without the migration, Room would throw an error on schema mismatch.
+     * Includes migrations:
+     * - MIGRATION_1_2: Adds trip_history table
+     * - MIGRATION_2_3: Adds cloud sync fields to trip_history
+     *
+     * Without migrations, Room would throw an error on schema mismatch.
      *
      * @param context Application context
      * @return VoltRouteDatabase instance
@@ -242,7 +291,7 @@ object AppModule {
             VoltRouteDatabase::class.java,
             "voltroute_database"
         )
-        .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
         .build()
     }
 

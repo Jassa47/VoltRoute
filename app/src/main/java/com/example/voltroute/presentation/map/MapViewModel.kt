@@ -39,7 +39,8 @@ class MapViewModel @Inject constructor(
     private val saveToCacheUseCase: SaveToCacheUseCase,
     private val loadFromCacheUseCase: LoadFromCacheUseCase,
     private val networkMonitor: NetworkMonitor,
-    private val saveTripHistoryUseCase: SaveTripHistoryUseCase
+    private val saveTripHistoryUseCase: SaveTripHistoryUseCase,
+    private val syncManager: com.example.voltroute.data.remote.sync.SyncManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -265,6 +266,8 @@ class MapViewModel @Inject constructor(
                                 chargingPlan = plan,
                                 estimatedCostDollars = 0.0
                             )
+                            // Trigger sync to upload this trip to cloud
+                            syncManager.syncNow()
                         }
                     }
                 }
