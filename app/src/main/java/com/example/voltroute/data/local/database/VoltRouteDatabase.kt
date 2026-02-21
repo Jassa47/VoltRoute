@@ -26,6 +26,7 @@ import com.example.voltroute.data.local.entity.TripHistoryEntity
  *
  * Version 1: Initial schema (cache only)
  * Version 2: Added trip_history table
+ * Version 3: Added sync fields to trip_history (syncId, lastModified, isSynced)
  * exportSchema = false: Don't export schema to file (not needed for this app)
  *
  * DAOs:
@@ -41,7 +42,7 @@ import com.example.voltroute.data.local.entity.TripHistoryEntity
         ChargingPlanEntity::class,
         TripHistoryEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class VoltRouteDatabase : RoomDatabase() {

@@ -15,6 +15,7 @@ import java.util.Locale
  * - Charging information (stops count, charging time)
  * - Energy and cost metrics
  * - Trip timestamp
+ * - Cloud sync metadata (syncId, lastModified, isSynced)
  *
  * Computed properties provide formatted display strings for UI.
  */
@@ -32,7 +33,12 @@ data class TripHistoryEntity(
     val totalChargingTimeMinutes: Int,
     val estimatedCostDollars: Double,
     val energyUsedKWh: Double,
-    val tripDate: Long = System.currentTimeMillis()
+    val tripDate: Long = System.currentTimeMillis(),
+
+    // NEW SYNC FIELDS - For cloud synchronization
+    val syncId: String? = null,              // Firestore document ID (null until synced)
+    val lastModified: Long = System.currentTimeMillis(),  // For conflict resolution
+    val isSynced: Boolean = false            // Upload status flag (false = needs upload)
 ) {
     /**
      * Formatted date string for display
