@@ -81,7 +81,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -91,27 +91,11 @@ fun SplashScreen(
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = spacedBy(16.dp)
         ) {
-            // VoltRoute logo vector drawable
+            // VoltRoute Logo (PNG)
             Image(
-                painter = painterResource(id = R.drawable.ic_voltroute_logo),
+                painter = painterResource(id = R.drawable.voltroutelogo),
                 contentDescription = "VoltRoute Logo",
-                modifier = Modifier.size(120.dp)
-            )
-
-            // App name
-            Text(
-                text = "VoltRoute",
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-
-            // Tagline
-            Text(
-                text = "EV Navigation",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
+                modifier = Modifier.size(200.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -122,15 +106,15 @@ fun SplashScreen(
                 modifier = Modifier
                     .width(200.dp)
                     .height(4.dp),
-                color = MaterialTheme.colorScheme.onPrimary,
-                trackColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             )
 
             // Loading text
             Text(
                 text = "Loading...",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
         }
     }

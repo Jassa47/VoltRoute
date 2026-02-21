@@ -2,6 +2,8 @@ package com.example.voltroute.presentation.auth
 
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +43,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.voltroute.R
 import com.example.voltroute.data.auth.AuthState
 
 /**
@@ -177,7 +182,8 @@ fun PhoneAuthScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -202,26 +208,26 @@ fun PhoneAuthScreen(
                 if (!uiState.isCodeSent) {
                     // STEP 1: Phone Number Entry
 
-                    // Phone icon
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                    // VoltRoute Logo (PNG)
+                    Image(
+                        painter = painterResource(id = R.drawable.voltroutelogo),
+                        contentDescription = "VoltRoute Logo",
+                        modifier = Modifier.size(200.dp)
                     )
 
                     // Title
                     Text(
                         text = "Enter Phone Number",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
 
                     // Description
                     Text(
                         text = "We'll send you a verification code",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = Color.White.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center
                     )
 
@@ -231,11 +237,11 @@ fun PhoneAuthScreen(
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = { phoneNumber = it },
-                        label = { Text("Phone Number") },
+                        label = { Text("Phone Number", color = Color.White) },
                         leadingIcon = {
-                            Icon(Icons.Default.Phone, contentDescription = null)
+                            Icon(Icons.Default.Phone, contentDescription = null, tint = Color.White)
                         },
-                        placeholder = { Text("+1 234 567 8900") },
+                        placeholder = { Text("+1 234 567 8900", color = Color.White.copy(alpha = 0.5f)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Phone,
                             imeAction = ImeAction.Done
@@ -247,7 +253,16 @@ fun PhoneAuthScreen(
                         ),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        supportingText = { Text("Include country code (e.g., +1)") }
+                        supportingText = { Text("Include country code (e.g., +1)", color = Color.White.copy(alpha = 0.7f)) },
+                        colors = androidx.compose.material3.TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                        )
                     )
 
                     // Send Code button
@@ -282,14 +297,15 @@ fun PhoneAuthScreen(
                     Text(
                         text = "Enter Verification Code",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
 
                     // Description with phone number
                     Text(
                         text = "Code sent to $phoneNumber",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = Color.White.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center
                     )
 
@@ -299,11 +315,11 @@ fun PhoneAuthScreen(
                     OutlinedTextField(
                         value = verificationCode,
                         onValueChange = { verificationCode = it },
-                        label = { Text("Verification Code") },
+                        label = { Text("Verification Code", color = Color.White) },
                         leadingIcon = {
-                            Icon(Icons.Default.Pin, contentDescription = null)
+                            Icon(Icons.Default.Pin, contentDescription = null, tint = Color.White)
                         },
-                        placeholder = { Text("123456") },
+                        placeholder = { Text("123456", color = Color.White.copy(alpha = 0.5f)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
@@ -313,7 +329,16 @@ fun PhoneAuthScreen(
                         ),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        supportingText = { Text("6-digit code from SMS") }
+                        supportingText = { Text("6-digit code from SMS", color = Color.White.copy(alpha = 0.7f)) },
+                        colors = androidx.compose.material3.TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f)
+                        )
                     )
 
                     // Verify Code button
@@ -342,7 +367,7 @@ fun PhoneAuthScreen(
                             verificationCode = ""
                         }
                     ) {
-                        Text("Use different number")
+                        Text("Use different number", color = Color.White)
                     }
                 }
             }
