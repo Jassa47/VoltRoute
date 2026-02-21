@@ -367,21 +367,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Material Design 3** for design system
 - **Jetpack Compose** for modern Android UI
 
----
 
-##  Support
-
-For support, email your.email@example.com or open an issue on GitHub.
-
----
-
-<p align="center">
-  Made with ⚡ and ❤️
-</p>
-
-<p align="center">
-  <img src="screenshots/logo.png" alt="VoltRoute" width="100"/>
-</p>
-```
 
 
