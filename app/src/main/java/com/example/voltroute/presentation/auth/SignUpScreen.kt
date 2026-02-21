@@ -1,5 +1,6 @@
 package com.example.voltroute.presentation.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,6 +54,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.painterResource
+import com.example.voltroute.R
 import com.example.voltroute.data.auth.AuthState
 import kotlinx.coroutines.delay
 
@@ -200,10 +204,12 @@ fun SignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Logo emoji
-                Text(
-                    text = "⚡",
-                    style = MaterialTheme.typography.displayMedium
+                // VoltRoute logo - mono version adapts to light/dark theme
+                Image(
+                    painter = painterResource(id = R.drawable.ic_voltroute_logo_mono),
+                    contentDescription = "VoltRoute Logo",
+                    modifier = Modifier.size(80.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
 
                 // Title

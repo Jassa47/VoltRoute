@@ -2,6 +2,7 @@ package com.example.voltroute.presentation.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,10 +23,11 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.voltroute.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -88,10 +91,11 @@ fun SplashScreen(
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = spacedBy(16.dp)
         ) {
-            // Lightning bolt icon
-            Text(
-                text = "⚡",
-                fontSize = 80.sp
+            // VoltRoute logo vector drawable
+            Image(
+                painter = painterResource(id = R.drawable.ic_voltroute_logo),
+                contentDescription = "VoltRoute Logo",
+                modifier = Modifier.size(120.dp)
             )
 
             // App name
