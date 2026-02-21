@@ -83,5 +83,70 @@ class FirestoreRepository @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    /**
+     * Upload trip to Firestore
+     *
+     * Stores trip in users/{userId}/trips/{tripId} collection.
+     * Uses trip.id as document ID for idempotent uploads.
+     *
+     * @param userId Firebase Auth UID (trip owner)
+     * @param trip CloudTrip to upload
+     * @return Result with Unit on success, Exception on failure
+     */
+    suspend fun uploadTrip(userId: String, trip: CloudTrip): Result<Unit> = try {
+        firestore.collection("users")
+            .document(userId)
+            .collection("trips")
+            .document(trip.id)
+            .set(trip, SetOptions.merge())
+            .await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Get all trips for a user from Firestore
+     *
+     * @param userId Firebase Auth UID
+     * @return Result with List<CloudTrip> on success, Exception on failure
+     */
+    suspend fun getAllTrips(userId: String): Result<List<CloudTrip>> = try {
+        val snapshot = firestore.collection("users")
+            .document(userId)
+            .collection("trips")
+            .get()
+            .await()
+
+        val trips = snapshot.documents.mapNotNull { doc ->
+            doc.toObject(CloudTrip::class.java)
+        }
+        Result.success(trips)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Delete trip from Firestore
+     *
+     * Removes trip document from users/{userId}/trips/{tripId}.
+     * This triggers REMOVED event in snapshot listeners on other devices.
+     *
+     * @param userId Firebase Auth UID (trip owner)
+     * @param tripId Cloud trip ID (document ID)
+     * @return Result with Unit on success, Exception on failure
+     */
+    suspend fun deleteTrip(userId: String, tripId: String): Result<Unit> = try {
+        firestore.collection("users")
+            .document(userId)
+            .collection("trips")
+            .document(tripId)
+            .delete()
+            .await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }
 

@@ -2,6 +2,7 @@ package com.example.voltroute.data.remote.sync
 
 import android.util.Log
 import com.example.voltroute.data.auth.AuthRepository
+import com.example.voltroute.data.local.entity.TripHistoryEntity
 import com.example.voltroute.data.local.repository.TripHistoryRepository
 import com.example.voltroute.data.remote.firestore.CloudTrip
 import com.example.voltroute.data.remote.firestore.FirestoreRepository

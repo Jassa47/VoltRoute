@@ -92,7 +92,8 @@ class MainActivity : ComponentActivity() {
                     },
                     onThemeChanged = { darkMode: Boolean ->
                         isDarkMode = darkMode
-                    }
+                    },
+                    syncManager = syncManager
                 )
             }
         }

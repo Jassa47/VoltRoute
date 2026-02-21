@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,17 +41,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.example.voltroute.data.remote.sync.SyncManager
 import com.example.voltroute.data.remote.sync.SyncState
+import com.example.voltroute.data.remote.sync.SyncWorker
 import com.example.voltroute.domain.model.VehiclePreset
 import com.example.voltroute.presentation.auth.AuthViewModel
 import kotlinx.coroutines.launch
@@ -208,6 +214,38 @@ fun SettingsScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
+                    }
+                )
+            }
+
+            item {
+                val context = LocalContext.current
+                val workManager = WorkManager.getInstance(context)
+                val syncWorkInfo by workManager
+                    .getWorkInfosForUniqueWorkLiveData(SyncWorker.WORK_NAME)
+                    .observeAsState()
+
+                ListItem(
+                    headlineContent = { Text("Background Sync") },
+                    supportingContent = {
+                        val status = syncWorkInfo?.firstOrNull()?.state
+                        when (status) {
+                            WorkInfo.State.RUNNING -> Text("Running...")
+                            WorkInfo.State.ENQUEUED -> Text("Scheduled (every 1 hour)")
+                            WorkInfo.State.SUCCEEDED -> Text("Last run: Success")
+                            WorkInfo.State.FAILED -> Text(
+                                "Last run: Failed",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            else -> Text("Every 1 hour when online")
+                        }
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 )
             }

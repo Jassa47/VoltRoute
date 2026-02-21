@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.voltroute.data.auth.AuthState
+import com.example.voltroute.data.remote.sync.SyncManager
 import com.example.voltroute.domain.model.VehiclePreset
 import com.example.voltroute.presentation.auth.LoginScreen
 import com.example.voltroute.presentation.auth.PhoneAuthScreen
@@ -63,7 +64,8 @@ fun AppNavigation(
     selectedPresetId: String,
     authState: AuthState,
     onVehicleSelected: (VehiclePreset) -> Unit,
-    onThemeChanged: (Boolean) -> Unit
+    onThemeChanged: (Boolean) -> Unit,
+    syncManager: SyncManager
 ) {
     val navController = rememberNavController()
 
@@ -236,6 +238,7 @@ fun AppNavigation(
                 )
             }
         ) {
+
             SettingsScreen(
                 selectedPresetId = selectedPresetId,
                 isDarkMode = isDarkMode,
@@ -243,7 +246,8 @@ fun AppNavigation(
                 onThemeChanged = onThemeChanged,
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
+                syncManager = syncManager
             )
         }
 
