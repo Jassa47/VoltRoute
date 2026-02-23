@@ -345,28 +345,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-##  License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-##  Author
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-
----
-
-##  Acknowledgments
-
-- **Google Maps Platform** for mapping and directions
-- **Open Charge Map** for charging station data
-- **Firebase** for authentication and cloud sync
-- **Material Design 3** for design system
-- **Jetpack Compose** for modern Android UI
-
-
 
 
